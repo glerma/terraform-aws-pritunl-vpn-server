@@ -157,7 +157,6 @@ resource "aws_iam_role_policy" "policy" {
 
   name   = "${var.resource_name_prefix}-instance-policy"
   role   = "${aws_iam_role.role.id}"
-  policy = "${data.template_file.iam_instance_role_policy.rendered}"
   policy = templatefile("${path.module}/templates/user_data.sh.tpl", {
     s3_backup_bucket     = "local.backup_bucket_name"
     resource_name_prefix = "var.resource_name_prefix"

@@ -158,11 +158,9 @@ resource "aws_iam_role_policy" "policy" {
   name   = "${var.resource_name_prefix}-instance-policy"
   role   = "${aws_iam_role.role.id}"
   policy = templatefile("${path.module}/templates/user_data.sh.tpl", {
-    s3_backup_bucket     = "local.backup_bucket_name"
-    resource_name_prefix = "var.resource_name_prefix"
-    aws_region           = "data.aws_region.current.name"
-    account_id           = "data.aws_caller_identity.current.account_id"
-    ssm_key_prefix       = "/pritunl/var.resource_name_prefix/*"
+            aws_region          = "data.aws_region.current.name"
+            s3_backup_bucket    = "local.backup_bucket_name"
+            healthchecks_io_key = "/pritunl/var.resource_name_prefix/healthchecks-io-key"
                         })
 
 }
@@ -184,7 +182,7 @@ resource "aws_security_group" "pritunl" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["${var.internal_cidrs}"]
+    cidr_blocks = "${var.internal_cidrs}"
   }
 
   # HTTP access for Let's Encrypt validation
@@ -203,7 +201,7 @@ resource "aws_security_group" "pritunl" {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["${var.internal_cidrs}"]
+    cidr_blocks = "${var.internal_cidrs}"
   }
 
   # VPN WAN access
@@ -219,7 +217,7 @@ resource "aws_security_group" "pritunl" {
     from_port   = -1
     to_port     = -1
     protocol    = "icmp"
-    cidr_blocks = ["${var.internal_cidrs}"]
+    cidr_blocks = "${var.internal_cidrs}"
   }
 
   # outbound internet access
@@ -249,7 +247,7 @@ resource "aws_security_group" "allow_from_office" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["${var.whitelist}"]
+    cidr_blocks = "${var.whitelist}"
   }
 
   # HTTPS access
@@ -258,7 +256,7 @@ resource "aws_security_group" "allow_from_office" {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["${var.whitelist}"]
+    cidr_blocks = "${var.whitelist}"
   }
 
   # ICMP
@@ -267,7 +265,7 @@ resource "aws_security_group" "allow_from_office" {
     from_port   = -1
     to_port     = -1
     protocol    = "icmp"
-    cidr_blocks = ["${var.whitelist}"]
+    cidr_blocks = "${var.whitelist}"
   }
 
   # outbound internet access

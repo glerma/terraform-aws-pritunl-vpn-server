@@ -36,7 +36,7 @@
         "Action": [
             "ssm:GetParameters"
         ],
-        "Resource": "arn:aws:ssm:${aws_region}:${account_id}:parameter${ssm_key_prefix}"
+        "Resource": "arn:aws:ssm:::${aws_region}:${account_id}:parameter${ssm_key_prefix}"
       },
       {
           "Effect": "Allow",

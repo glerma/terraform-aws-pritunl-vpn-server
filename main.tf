@@ -6,6 +6,7 @@ locals {
   backup_bucket_name = "${var.s3_bucket_name != "" ? var.s3_bucket_name : format("%s-%s", var.resource_name_prefix, "backup")}"
 }
 
+/*
 data "template_file" "user_data" {
   template = "${file("${path.module}/templates/user_data.sh.tpl")}"
 
@@ -15,7 +16,9 @@ data "template_file" "user_data" {
     healthchecks_io_key = "/pritunl/${var.resource_name_prefix}/healthchecks-io-key"
   }
 }
+*/
 
+/*
 data "template_file" "kms_policy" {
   template = "${file("${path.module}/templates/key_policy.json.tpl")}"
 
@@ -25,7 +28,9 @@ data "template_file" "kms_policy" {
     key_admin_arn        = "${aws_iam_role.role.arn}"
   }
 }
+*/
 
+/*
 data "template_file" "iam_instance_role_policy" {
   template = "${file("${path.module}/templates/iam_instance_role_policy.json.tpl")}"
 
@@ -37,6 +42,7 @@ data "template_file" "iam_instance_role_policy" {
     ssm_key_prefix       = "/pritunl/${var.resource_name_prefix}/*"
   }
 }
+*/
 
 resource "null_resource" "waiter" {
   depends_on = ["aws_iam_instance_profile.ec2_profile"]
@@ -50,8 +56,12 @@ resource "aws_kms_key" "parameter_store" {
   depends_on = ["null_resource.waiter"]
 
   description = "Parameter store and backup key for ${var.resource_name_prefix}"
+  policy =        templatefile("${path.module}/templates/key_policy.json.tpl", {
+                    resource_name_prefix = "var.resource_name_prefix"
+                    account_id           = "data.aws_caller_identity.current.account_id"
+                    key_admin_arn        = "aws_iam_role.role.arn"
+                  })
 
-  policy                  = "${data.template_file.kms_policy.rendered}"
   deletion_window_in_days = 30
   is_enabled              = true
   enable_key_rotation     = true
@@ -148,6 +158,14 @@ resource "aws_iam_role_policy" "policy" {
   name   = "${var.resource_name_prefix}-instance-policy"
   role   = "${aws_iam_role.role.id}"
   policy = "${data.template_file.iam_instance_role_policy.rendered}"
+  policy = templatefile("${path.module}/templates/user_data.sh.tpl", {
+    s3_backup_bucket     = "local.backup_bucket_name"
+    resource_name_prefix = "var.resource_name_prefix"
+    aws_region           = "data.aws_region.current.name"
+    account_id           = "data.aws_caller_identity.current.account_id"
+    ssm_key_prefix       = "/pritunl/var.resource_name_prefix/*"
+                        })
+
 }
 
 resource "aws_iam_instance_profile" "ec2_profile" {
@@ -273,7 +291,11 @@ resource "aws_instance" "pritunl" {
   ami           = "${var.ami_id}"
   instance_type = "${var.instance_type}"
   key_name      = "${var.aws_key_name}"
-  user_data     = "${data.template_file.user_data.rendered}"
+  user_data     = templatefile("${path.module}/templates/user_data.sh.tpl", {
+                        aws_region          = "data.aws_region.current.name"
+                        s3_backup_bucket    = "local.backup_bucket_name"
+                        healthchecks_io_key = "/pritunl/var.resource_name_prefix/healthchecks-io-key"
+                  })
 
   vpc_security_group_ids = [
     "${aws_security_group.pritunl.id}",

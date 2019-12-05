@@ -52,7 +52,7 @@ resource "aws_kms_alias" "parameter_store" {
 }
 
 resource "aws_ssm_parameter" "healthchecks_io_key" {
-  name      = "/var.environment/${var.resource_name_prefix}/healthchecks-io-key"
+  name      = "/${var.environment}/${var.resource_name_prefix}/healthchecks-io-key"
   type      = "SecureString"
   value     = "${var.healthchecks_io_key}"
   key_id    = "${aws_kms_key.parameter_store.arn}"

@@ -58,7 +58,3 @@ variable "s3_bucket_name" {
   default     = ""
 }
 
-variable "environment" {
-  type = string
-  default = ""
-}

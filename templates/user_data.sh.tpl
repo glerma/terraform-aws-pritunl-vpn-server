@@ -1,4 +1,8 @@
 #!/bin/bash -xe
+# send the script output to a different log file.
+exec > >(tee /var/log/user-data.log|logger -t user-data ) 2>&1
+echo BEGIN
+date '+%Y-%m-%d %H:%M:%S'
 
 export PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/opt/aws/bin:/root/bin
 

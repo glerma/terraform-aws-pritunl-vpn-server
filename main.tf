@@ -6,43 +6,6 @@ locals {
   backup_bucket_name = "${var.s3_bucket_name != "" ? var.s3_bucket_name : format("%s-%s", var.resource_name_prefix, "backup")}"
 }
 
-/*
-data "template_file" "user_data" {
-  template = "${file("${path.module}/templates/user_data.sh.tpl")}"
-
-  vars {
-    aws_region          = "${data.aws_region.current.name}"
-    s3_backup_bucket    = "${local.backup_bucket_name}"
-    healthchecks_io_key = "/pritunl/${var.resource_name_prefix}/healthchecks-io-key"
-  }
-}
-*/
-
-/*
-data "template_file" "kms_policy" {
-  template = "${file("${path.module}/templates/key_policy.json.tpl")}"
-
-  vars {
-    resource_name_prefix = "${var.resource_name_prefix}"
-    account_id           = "${data.aws_caller_identity.current.account_id}"
-    key_admin_arn        = "${aws_iam_role.role.arn}"
-  }
-}
-*/
-
-/*
-data "template_file" "iam_instance_role_policy" {
-  template = "${file("${path.module}/templates/iam_instance_role_policy.json.tpl")}"
-
-  vars {
-    s3_backup_bucket     = "${local.backup_bucket_name}"
-    resource_name_prefix = "${var.resource_name_prefix}"
-    aws_region           = "${data.aws_region.current.name}"
-    account_id           = "${data.aws_caller_identity.current.account_id}"
-    ssm_key_prefix       = "/pritunl/${var.resource_name_prefix}/*"
-  }
-}
-*/
 
 resource "null_resource" "waiter" {
   depends_on = ["aws_iam_instance_profile.ec2_profile"]
@@ -294,6 +257,8 @@ resource "aws_security_group" "allow_from_office" {
           var.tags,
         )
 }
+
+
 
 resource "aws_instance" "pritunl" {
   ami           = "${var.ami_id}"

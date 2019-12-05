@@ -1,24 +1,16 @@
 {
   "Version": "2012-10-17",
-  "Id": "${resource_name_prefix}-parameter-store",
+  "Id": "${resource_name_prefix}ParameterStore",
   "Statement": [
     {
-      "Sid": "Enable IAM User Permissions",
+      "Sid": "EnableIAMUserPermissions",
       "Effect": "Allow",
-      "Principal": {
-        "AWS": "arn:aws:iam:::${account_id}:root"
-      },
       "Action": "kms:*",
       "Resource": "*"
     },
     {
-      "Sid": "Allow access for Key Administrators",
+      "Sid": "AllowAccessForKeyAdministrators",
       "Effect": "Allow",
-      "Principal": {
-        "AWS": [
-          "${key_admin_arn}"
-        ]
-      },
       "Action": [
         "kms:Create*",
         "kms:Describe*",
@@ -36,13 +28,8 @@
       "Resource": "*"
     },
     {
-      "Sid": "Allow use of the key",
+      "Sid": "AllowUseOfTheKey",
       "Effect": "Allow",
-      "Principal": {
-        "AWS": [
-          "${key_admin_arn}"
-        ]
-      },
       "Action": [
         "kms:Encrypt",
         "kms:Decrypt",
@@ -53,13 +40,8 @@
       "Resource": "*"
     },
     {
-      "Sid": "Allow attachment of persistent resources",
+      "Sid": "AllowAttachmentOfPersistentResources",
       "Effect": "Allow",
-      "Principal": {
-        "AWS": [
-        "${key_admin_arn}"
-        ]
-      },
       "Action": [
         "kms:CreateGrant",
         "kms:ListGrants",

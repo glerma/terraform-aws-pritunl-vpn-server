@@ -111,4 +111,4 @@ fi
 EOF
 
 KEY=$(sudo pritunl setup-key)
-aws ssm put-parameter --name "/${var.environment}/${ssm_key_prefix}/pritunl-default-password" --value $$KEY --type "SecureString" --region "${aws_region}"
+aws ssm put-parameter --name "/${environment}/${ssm_key_prefix}/pritunl-default-password" --value $$KEY --type "SecureString" --region "${aws_region}"

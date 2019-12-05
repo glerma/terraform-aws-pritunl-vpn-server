@@ -19,11 +19,13 @@ resource "aws_kms_key" "parameter_store" {
   depends_on = ["null_resource.waiter"]
 
   description = "Parameter store and backup key for ${var.resource_name_prefix}"
+  /*
   policy =        templatefile("${path.module}/templates/key_policy.json.tpl", {
                     resource_name_prefix = "var.resource_name_prefix"
                     account_id           = "data.aws_caller_identity.current.account_id"
                     key_admin_arn        = "aws_iam_role.role.arn"
                   })
+  */
 
   deletion_window_in_days = 30
   is_enabled              = true

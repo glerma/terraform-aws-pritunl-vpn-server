@@ -13,7 +13,7 @@ amazon-linux-extras install epel -y
 
 # Amazon linux does not have pip installed by default.
 string=$(uname -r)
-if [[ $string == *"amzn"* ]]; thenn
+if [[ $string == *"amzn"* ]]; then
   sudo yum install -y python-pip
 fi
 

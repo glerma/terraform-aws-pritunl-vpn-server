@@ -57,3 +57,8 @@ variable "s3_bucket_name" {
   description = "[String] Optional S3 bucket name for backups"
   default     = ""
 }
+
+variable "environment" {
+  type = string
+  default = ""
+}

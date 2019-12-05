@@ -132,7 +132,7 @@ resource "aws_iam_role_policy" "policy" {
                       resource_name_prefix = "${var.resource_name_prefix}"
                       aws_region           = "${data.aws_region.current.name}"
                       account_id           = "${data.aws_caller_identity.current.account_id}"
-                      ssm_key_prefix       = "/pritunl/var.resource_name_prefix/*"
+                      ssm_key_prefix       = "/pritunl/${var.resource_name_prefix}/*"
                         })
 
 }
@@ -263,7 +263,7 @@ resource "aws_instance" "pritunl" {
   user_data     = templatefile("${path.module}/templates/user_data.sh.tpl", {
                         aws_region          = "${data.aws_region.current.name}"
                         s3_backup_bucket    = "${local.backup_bucket_name}"
-                        healthchecks_io_key = "/pritunl/var.resource_name_prefix/healthchecks-io-key"
+                        healthchecks_io_key = "/pritunl/${var.resource_name_prefix}/healthchecks-io-key"
                   })
 
   vpc_security_group_ids = [

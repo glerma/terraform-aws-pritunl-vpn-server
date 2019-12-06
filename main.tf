@@ -264,7 +264,7 @@ resource "aws_instance" "pritunl" {
   user_data     = templatefile("${path.module}/templates/user_data.sh.tpl", {
                         aws_region          = "${data.aws_region.current.name}"
                         s3_backup_bucket    = "${local.backup_bucket_name}"
-                        healthchecks_io_key = "/pritunl/${var.resource_name_prefix}/healthchecks-io-key"
+                        healthchecks_io_key = "${var.environment}/pritunl/healthchecks-io-key"
                         environment = "${var.environment}"
                   })
 

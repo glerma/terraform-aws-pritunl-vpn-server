@@ -133,7 +133,6 @@ resource "aws_iam_role_policy" "policy" {
                       aws_region           = "${data.aws_region.current.name}"
                       account_id           = "${data.aws_caller_identity.current.account_id}"
                       ssm_key_prefix       = "/pritunl/${var.resource_name_prefix}/*"
-                      environment = "${var.environment}"
                         })
 
 }
@@ -265,6 +264,7 @@ resource "aws_instance" "pritunl" {
                         aws_region          = "${data.aws_region.current.name}"
                         s3_backup_bucket    = "${local.backup_bucket_name}"
                         healthchecks_io_key = "/pritunl/${var.resource_name_prefix}/healthchecks-io-key"
+                        environment = "${var.environment}"
                   })
 
   vpc_security_group_ids = [

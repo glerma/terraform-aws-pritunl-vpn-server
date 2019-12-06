@@ -133,6 +133,7 @@ resource "aws_iam_role_policy" "policy" {
                       aws_region           = "${data.aws_region.current.name}"
                       account_id           = "${data.aws_caller_identity.current.account_id}"
                       ssm_key_prefix       = "/pritunl/${var.resource_name_prefix}/*"
+                      environment = "${var.environment}"
                         })
 
 }

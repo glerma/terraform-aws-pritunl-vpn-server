@@ -21,15 +21,18 @@ variable "instance_type" {
 
 variable "whitelist" {
   description = "[List] Office IP CIDRs for SSH and HTTPS"
+  type = list(string)
 }
 
 variable "whitelist_http" {
   description = "[List] Whitelist for HTTP port"
+  type = list(string)
   default     = ["0.0.0.0/0"]
 }
 
 variable "tags" {
   description = "A map of tags to add to all resources"
+  type = map(string)
   default     = {}
 }
 

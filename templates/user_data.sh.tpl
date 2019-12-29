@@ -111,6 +111,3 @@ if [ -f /etc/bashrc ]; then
 fi
 EOF
 
-KEY=$(sudo pritunl setup-key)
-aws ssm put-parameter --name "/${environment}/pritunl/pritunl-key" --value "$${KEY}" --type "SecureString" --region "${aws_region}"
-aws ssm put-parameter --name "/${environment}/pritunl/pritunl-default-pw" --value "$${DEFAULT_PASSWORD}" --type "SecureString" --region "${aws_region}"

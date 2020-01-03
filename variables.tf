@@ -3,6 +3,11 @@ variable "member_account" {
   type        = string
 }
 
+variable "environment" {
+  description = "The environment the resources are being provisioned in"
+  type        = string
+}
+
 variable "region" {
   description = "Enter the region that the provider will operate in."
   type        = string

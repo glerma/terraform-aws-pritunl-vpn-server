@@ -1,3 +1,14 @@
+variable "member_account" {
+  description = "Provide the AWS Organization Member Account ID.  Terraform will assume the role provided int his account for administrative access."
+  type        = string
+}
+
+variable "region" {
+  description = "Enter the region that the provider will operate in."
+  type        = string
+  default     = "us-east-1"
+}
+
 variable "aws_key_name" {
   description = "SSH keypair name for the VPN instance"
 }

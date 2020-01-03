@@ -26,16 +26,33 @@ resource "aws_kms_key" "parameter_store" {
   enable_key_rotation     = true
 
   tags = merge(
-          {
-            "Name" = format(
-              "%s-%s", 
-              var.resource_name_prefix, 
-              "parameter-store"
-            )
-          },
-          var.tags
-        )
-        
+    {
+      "Name" = format(
+        "%s-%s",
+        var.resource_name_prefix,
+        "parameter-store"
+      )
+    },
+    var.tags
+  )
+
+}
+
+resource "tls_private_key" "ssh" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+resource "aws_key_pair" "generated_key" {
+  key_name   = var.aws_key_name
+  public_key = tls_private_key.ssh.public_key_openssh
+}
+
+resource "aws_ssm_parameter" "vault_ssh_keys" {
+  name        = "/${var.environment}/pritunl/ssh-private-key"
+  description = "SSH Private Key for Pritunl VPN Server: ${var.environment}"
+  type        = "SecureString"
+  value       = tls_private_key.ssh.private_key_pem
 }
 
 resource "aws_kms_alias" "parameter_store" {
@@ -53,17 +70,17 @@ resource "aws_ssm_parameter" "healthchecks_io_key" {
   overwrite = true
 
   tags = merge(
-          {
-            "Name" = format(
-              "%s/%s/%s", 
-              "${var.environment}", 
-              var.resource_name_prefix, 
-              "healthchecks-io-key"
-              )
-          },
-          var.tags,
-        )
-        
+    {
+      "Name" = format(
+        "%s/%s/%s",
+        "${var.environment}",
+        var.resource_name_prefix,
+        "healthchecks-io-key"
+      )
+    },
+    var.tags,
+  )
+
 }
 
 resource "aws_s3_bucket" "backup" {
@@ -94,11 +111,11 @@ resource "aws_s3_bucket" "backup" {
   }
 
   tags = merge(
-          { 
-            "Name" = local.backup_bucket_name
-          },
-          var.tags,
-        )
+    {
+      "Name" = local.backup_bucket_name
+    },
+    var.tags,
+  )
 }
 
 # ec2 iam role
@@ -125,16 +142,16 @@ EOF
 resource "aws_iam_role_policy" "policy" {
   depends_on = [aws_iam_role.role]
 
-  name   = "${var.resource_name_prefix}-instance-policy"
-  role   = aws_iam_role.role.id
+  name = "${var.resource_name_prefix}-instance-policy"
+  role = aws_iam_role.role.id
   policy = templatefile("${path.module}/templates/iam_instance_role_policy.json.tpl", {
-                      s3_backup_bucket     = local.backup_bucket_name
-                      resource_name_prefix = var.resource_name_prefix
-                      aws_region           = data.aws_region.current.name
-                      account_id           = data.aws_caller_identity.current.account_id
-                      ssm_key_prefix       = "/pritunl/var.resource_name_prefix/*"
-                      environment = var.environment
-                        })
+    s3_backup_bucket     = local.backup_bucket_name
+    resource_name_prefix = var.resource_name_prefix
+    aws_region           = data.aws_region.current.name
+    account_id           = data.aws_caller_identity.current.account_id
+    ssm_key_prefix       = "/pritunl/var.resource_name_prefix/*"
+    environment          = var.environment
+  })
 
 }
 
@@ -200,11 +217,11 @@ resource "aws_security_group" "pritunl" {
   }
 
   tags = merge(
-            { 
-              "Name" = format("%s-%s", var.resource_name_prefix, "vpn")
-            },
-            var.tags,
-          )
+    {
+      "Name" = format("%s-%s", var.resource_name_prefix, "vpn")
+    },
+    var.tags,
+  )
 }
 
 resource "aws_security_group" "allow_from_office" {
@@ -248,11 +265,11 @@ resource "aws_security_group" "allow_from_office" {
   }
 
   tags = merge(
-            { 
-              "Name" = format("%s-%s", var.resource_name_prefix, "whitelist")
-            },
-          var.tags,
-        )
+    {
+      "Name" = format("%s-%s", var.resource_name_prefix, "whitelist")
+    },
+    var.tags,
+  )
 }
 
 
@@ -261,12 +278,12 @@ resource "aws_instance" "pritunl" {
   ami           = var.ami_id
   instance_type = var.instance_type
   key_name      = var.aws_key_name
-  user_data     = templatefile("${path.module}/templates/user_data.sh.tpl", {
-                        aws_region          = data.aws_region.current.name
-                        s3_backup_bucket    = local.backup_bucket_name
-                        healthchecks_io_key = "var.environment/pritunl/healthchecks-io-key"
-                        environment = var.environment
-                  })
+  user_data = templatefile("${path.module}/templates/user_data.sh.tpl", {
+    aws_region          = data.aws_region.current.name
+    s3_backup_bucket    = local.backup_bucket_name
+    healthchecks_io_key = "var.environment/pritunl/healthchecks-io-key"
+    environment         = var.environment
+  })
 
   vpc_security_group_ids = [
     aws_security_group.pritunl.id,
@@ -277,11 +294,11 @@ resource "aws_instance" "pritunl" {
   iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
 
   tags = merge(
-            { 
-              "Name" = format("%s-%s", var.resource_name_prefix, "vpn" )
-            },
-            var.tags,
-          ) 
+    {
+      "Name" = format("%s-%s", var.resource_name_prefix, "vpn")
+    },
+    var.tags,
+  )
 }
 
 resource "aws_eip" "pritunl" {

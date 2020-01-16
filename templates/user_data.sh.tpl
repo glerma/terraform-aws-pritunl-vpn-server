@@ -1,55 +1,61 @@
 #!/bin/bash -xe
+# send the script output to a different log file.
+exec > >(tee /var/log/user-data.log|logger -t user-data ) 2>&1
+echo BEGIN
+date '+%Y-%m-%d %H:%M:%S'
 
 export PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/opt/aws/bin:/root/bin
 
 yum update -y
 
+# amazon linux uses this command to isntall extra packages (epel)
+amazon-linux-extras install epel -y
+
+# Amazon linux does not have pip installed by default.
+string=$(uname -r)
+if [[ $string == *"amzn"* ]]; then
+  sudo yum install -y python-pip
+fi
+
 # upgrade pip to latest stable
-pip install -U pip
+sudo pip install -U pip
 # upgrade awscli to latest stable
 # upgrading pip from 9.0.3 to 10.0.1 changes the path from /usr/bin/pip to
 # /usr/local/bin/pip and the line below throws this error
 #     /var/lib/cloud/instance/scripts/part-001: line 10: /usr/bin/pip: No such file or directory
 # So, I export the PATH in the beggining correctly but still tries to from the old location
 # I couldn't see why in the outputs I'm going to hardcode it for now (01:10am)
-/usr/local/bin/pip install -U awscli
+ pip install -U awscli
 
 echo "* hard nofile 64000" >> /etc/security/limits.conf
 echo "* soft nofile 64000" >> /etc/security/limits.conf
 echo "root hard nofile 64000" >> /etc/security/limits.conf
 echo "root soft nofile 64000" >> /etc/security/limits.conf
 
-cat <<EOF > /etc/yum.repos.d/mongodb-org-3.2.repo
-[mongodb-org-3.2]
+cat <<EOF > /etc/yum.repos.d/mongodb-org-4.2.repo
+[mongodb-org-4.2]
 name=MongoDB Repository
-baseurl=https://repo.mongodb.org/yum/amazon/2013.03/mongodb-org/3.2/x86_64/
+baseurl=https://repo.mongodb.org/yum/amazon/2013.03/mongodb-org/4.2/x86_64/
 gpgcheck=1
 enabled=1
-gpgkey=https://www.mongodb.org/static/pgp/server-3.2.asc
+gpgkey=https://www.mongodb.org/static/pgp/server-4.2.asc
 EOF
 
-cat <<EOF > /etc/yum.repos.d/pritunl.repo
+sudo tee /etc/yum.repos.d/pritunl.repo << EOF
 [pritunl]
 name=Pritunl Repository
-baseurl=http://repo.pritunl.com/stable/yum/centos/7/
+baseurl=https://repo.pritunl.com/stable/yum/amazonlinux/2/
 gpgcheck=1
 enabled=1
 EOF
 
 gpg --keyserver hkp://keyserver.ubuntu.com --recv-keys 7568D9BB55FF9E5287D586017AE645C0CF8E292A
 gpg --armor --export 7568D9BB55FF9E5287D586017AE645C0CF8E292A > key.tmp; sudo rpm --import key.tmp; rm -f key.tmp
-
-yum install -y pritunl mongodb-org
-service mongod status || service mongod start
-
-chkconfig mongod on
-
-start pritunl || true
-
-cd /tmp
-curl https://amazon-ssm-eu-west-1.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm -o amazon-ssm-agent.rpm
-yum install -y amazon-ssm-agent.rpm
-status amazon-ssm-agent || start amazon-ssm-agent
+sudo yum -y install pritunl mongodb-org
+sudo systemctl start mongod pritunl
+sleep 10
+sudo systemctl enable mongod pritunl
+sudo systemctl status mongod pritunl
 
 cat <<EOF > /usr/sbin/mongobackup.sh
 #!/bin/bash -e
@@ -104,3 +110,4 @@ if [ -f /etc/bashrc ]; then
   . /etc/bashrc
 fi
 EOF
+

@@ -34,9 +34,10 @@
       {
         "Effect": "Allow",
         "Action": [
-            "ssm:GetParameters"
+            "ssm:GetParameters",
+            "ssm:PutParameter"
         ],
-        "Resource": "arn:aws:ssm:${aws_region}:${account_id}:parameter${ssm_key_prefix}"
+        "Resource": "arn:aws:ssm:${aws_region}:${account_id}:parameter/${environment}/pritunl/*"
       },
       {
           "Effect": "Allow",

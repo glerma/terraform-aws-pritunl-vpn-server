@@ -1,3 +1,19 @@
+variable "member_account" {
+  description = "Provide the AWS Organization Member Account ID.  Terraform will assume the role provided int his account for administrative access."
+  type        = string
+}
+
+variable "environment" {
+  description = "The environment the resources are being provisioned in"
+  type        = string
+}
+
+variable "region" {
+  description = "Enter the region that the provider will operate in."
+  type        = string
+  default     = "us-east-1"
+}
+
 variable "aws_key_name" {
   description = "SSH keypair name for the VPN instance"
 }
@@ -16,23 +32,23 @@ variable "ami_id" {
 
 variable "instance_type" {
   description = "Instance type for VPN Box"
-  type        = "string"
   default     = "t2.micro"
 }
 
 variable "whitelist" {
   description = "[List] Office IP CIDRs for SSH and HTTPS"
-  type        = "list"
+  type        = list(string)
 }
 
 variable "whitelist_http" {
   description = "[List] Whitelist for HTTP port"
-  type        = "list"
+  type        = list(string)
   default     = ["0.0.0.0/0"]
 }
 
 variable "tags" {
   description = "A map of tags to add to all resources"
+  type        = map(string)
   default     = {}
 }
 
@@ -48,7 +64,6 @@ variable "healthchecks_io_key" {
 
 variable "internal_cidrs" {
   description = "[List] IP CIDRs to whitelist in the pritunl's security group"
-  type        = "list"
   default     = ["10.0.0.0/8"]
 }
 
@@ -56,3 +71,4 @@ variable "s3_bucket_name" {
   description = "[String] Optional S3 bucket name for backups"
   default     = ""
 }
+
